@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulatore Azienda Agricola Ovina</title>
+    <style>
+        :root {
+            --bg: #121212;
+            --card-bg: #1e1e1e;
+            --accent: #2563eb;
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --warning: #d97706;
+            --border: #374151;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin: 0 0 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 0.85rem;
+        }
+
+        .cassa-card {
+            background-color: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .card-label {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            margin-bottom: 4px;
+        }
+
+        .card-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .progress-container {
+            margin-top: 8px;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background-color: #374151;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: var(--accent);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-fill.overload {
+            background-color: var(--danger);
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background-color: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn:hover {
+            border-color: var(--accent);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: var(--border);
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            text-align: center;
+            justify-content: center;
+            font-size: 1.05rem;
+            padding: 14px;
+        }
+
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+        }
+
+        .log-box {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            height: 150px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            color: var(--text-dim);
+        }
+
+        .log-entry {
+            margin-bottom: 6px;
+            border-bottom: 1px solid #2d3748;
+            padding-bottom: 4px;
+        }
+
+        .log-entry strong {
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>🐑 Simulatore Azienda Ovina</h1>
+        <div class="subtitle">Modalità Tecnica Realistica · <span id="lbl-anno">Anno 1</span></div>
+    </div>
+
+    <div class="cassa-card">
+        <span id="lbl-cassa">€ 25.000</span>
+        <span style="font-size: 0.9rem; font-weight: normal; color: var(--text-dim)" id="lbl-utile-previsto">Utile stimato: --</span>
+    </div>
+
+    <!-- Indicatori Principali -->
+    <div class="grid-2">
+        <div class="card">
+            <div class="card-label">Pecore in allevamento</div>
+            <div class="card-value" id="lbl-pecore">35</div>
+            <div class="progress-container">
+                <div class="card-label" style="font-size:0.75rem" id="lbl-carico-fabbricati">Capannoni: 35 / 50</div>
+                <div class="progress-bar"><div class="progress-fill" id="bar-fabbricati"></div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-label">Terreni Aziendali</div>
+            <div class="card-value" id="lbl-terreni">8 ha</div>
+            <div class="progress-container">
+                <div class="card-label" style="font-size:0.75rem" id="lbl-carico-terra">Carico: 4.4 pecore/ha</div>
+                <div class="progress-bar"><div class="progress-fill" id="bar-terra"></div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-label">Capacità Attrezzature</div>
+            <div class="card-value" id="lbl-attrezzature">50 capi</div>
+            <div class="progress-container">
+                <div class="card-label" style="font-size:0.75rem" id="lbl-carico-attrezzature">Uso: 70%</div>
+                <div class="progress-bar"><div class="progress-fill" id="bar-attrezzature"></div></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-label">Debito / Mutui</div>
+            <div class="card-value" id="lbl-debito">€ 0</div>
+            <div class="card-label" style="margin-top: 6px;" id="lbl-rata">Rata annua: € 0</div>
+        </div>
+    </div>
+
+    <!-- Azioni -->
+    <div class="actions">
+        <button class="btn btn-primary" onclick="avanzaAnno()">Avanza di 1 Anno ➔</button>
+
+        <button class="btn" onclick="compraPecore(10)" id="btn-pecore">
+            <span>➕ Acquista 10 Pecore</span>
+            <span>€ 1.800</span>
+        </button>
+
+        <button class="btn" onclick="compraTerra()" id="btn-terra">
+            <span id="lbl-btn-terra">🌾 Acquista 2 ha Terreno</span>
+            <span id="lbl-costo-terra">€ 12.000</span>
+        </button>
+
+        <button class="btn" onclick="ampliaCapannone()">
+            <span>🏗️ Amplia Capannone (+30 posti)</span>
+            <span>€ 8.000</span>
+        </button>
+
+        <button class="btn" onclick="compraAttrezzatura()">
+            <span>🚜 Potenzia Attrezzature (+40 capi)</span>
+            <span>€ 6.000</span>
+        </button>
+
+        <button class="btn" onclick="prendiMutuo()">
+            <span>🏦 Chiedi Finanziamento (€ 10.000)</span>
+            <span>Rata € 1.300/anno (10 anni)</span>
+        </button>
+    </div>
+
+    <!-- Report e Log -->
+    <div class="log-box" id="log-box">
+        <div class="log-entry"><strong>Inizio partita:</strong> Gestisci la stalla e fai crescere l'azienda bilanciando terra, stalle e macchinari.</div>
+    </div>
+</div>
+
+<script>
+    // Stato dell'Azienda
+    let stato = {
+        anno: 1,
+        cassa: 25000,
+        pecore: 35,
+        terreniHa: 8,
+        capienzaCapannone: 50,
+        capacitaAttrezzature: 50,
+        debito: 0,
+        rataAnnua: 0,
+        terraDisponibileMercato: 2 // ha disponibili sul mercato quest'anno
+    };
+
+    // Parametri tecnici ed economici
+    const COSTO_PECORA = 180;
+    const PREZZO_HA_TERRA = 6000;
+    const PRODUZIONE_LATTE_CAPO = 280; // Litri/anno per pecora
+    const PREZZO_LATTE = 1.45; // €/Litre
+    const COSTO_ALIMENTAZIONE_CAPO = 140; // €/anno per pecora (calcolo automatico)
+    const COSTI_FISSI_HA = 150; // €/ha lavorato
+    const CONTRIBUTO_PAC_HA = 300; // €/ha sussidio PAC
+
+    function aggiornaUI() {
+        document.getElementById('lbl-anno').innerText = "Anno " + stato.anno;
+        document.getElementById('lbl-cassa').innerText = "€ " + Math.round(stato.cassa).toLocaleString();
+        document.getElementById('lbl-pecore').innerText = stato.pecore;
+        document.getElementById('lbl-terreni').innerText = stato.terreniHa + " ha";
+        document.getElementById('lbl-attrezzature').innerText = stato.capacitaAttrezzature + " capi";
+        document.getElementById('lbl-debito').innerText = "€ " + Math.round(stato.debito).toLocaleString();
+        document.getElementById('lbl-rata').innerText = "Rata annua: € " + Math.round(stato.rataAnnua).toLocaleString();
+
+        // Limiti e Rapporti
+        let caricoTerra = (stato.pecore / stato.terreniHa).toFixed(1);
+        let pctFabbricati = Math.round((stato.pecore / stato.capienzaCapannone) * 100);
+        let pctAttrezzature = Math.round((stato.pecore / stato.capacitaAttrezzature) * 100);
+
+        document.getElementById('lbl-carico-fabbricati').innerText = `Capannoni: ${stato.pecore} / ${stato.capienzaCapannone}`;
+        document.getElementById('bar-fabbricati').style.width = Math.min(pctFabbricati, 100) + "%";
+        document.getElementById('bar-fabbricati').className = "progress-fill" + (pctFabbricati > 100 ? " overload" : "");
+
+        document.getElementById('lbl-carico-terra').innerText = `Carico: ${caricoTerra} pecore/ha (Ottimale < 8)`;
+        let pctTerra = Math.round((caricoTerra / 8) * 100);
+        document.getElementById('bar-terra').style.width = Math.min(pctTerra, 100) + "%";
+        document.getElementById('bar-terra').className = "progress-fill" + (caricoTerra > 8 ? " overload" : "");
+
+        document.getElementById('lbl-carico-attrezzature').innerText = `Uso macchine: ${pctAttrezzature}%`;
+        document.getElementById('bar-attrezzature').style.width = Math.min(pctAttrezzature, 100) + "%";
+        document.getElementById('bar-attrezzature').className = "progress-fill" + (pctAttrezzature > 100 ? " overload" : "");
+
+        // Mercato Terra
+        let btnTerra = document.getElementById('btn-terra');
+        if(stato.terraDisponibileMercato > 0) {
+            btnTerra.disabled = false;
+            document.getElementById('lbl-btn-terra').innerText = `🌾 Acquista ${stato.terraDisponibileMercato} ha Terreno`;
+            document.getElementById('lbl-costo-terra').innerText = `€ ${stato.terraDisponibileMercato * PREZZO_HA_TERRA}`;
+        } else {
+            btnTerra.disabled = true;
+            document.getElementById('lbl-btn-terra').innerText = `🌾 Nessun terreno in vendita quest'anno`;
+            document.getElementById('lbl-costo-terra').innerText = `-`;
+        }
+
+        // Stima Utile
+        let stimaRicavi = (stato.pecore * PRODUZIONE_LATTE_CAPO * PREZZO_LATTE) + (stato.terreniHa * CONTRIBUTO_PAC_HA);
+        let stimaCosti = (stato.pecore * COSTO_ALIMENTAZIONE_CAPO) + (stato.terreniHa * COSTI_FISSI_HA) + stato.rataAnnua;
+        let stimaUtile = Math.round(stimaRicavi - stimaCosti);
+        document.getElementById('lbl-utile-previsto').innerText = `Utile annuo stimato: € ${stimaUtile.toLocaleString()}`;
+    }
+
+    function aggiungiLog(messaggio) {
+        let logBox = document.getElementById('log-box');
+        let entry = document.createElement('div');
+        entry.className = 'log-entry';
+        entry.innerHTML = `<strong>Anno ${stato.anno}:</strong> ${messaggio}`;
+        logBox.prepend(entry);
+    }
+
+    function compraPecore(num) {
+        let costo = num * COSTO_PECORA;
+        if(stato.cassa < costo) return alert("Cassa insufficiente!");
+        if(stato.pecore + num > stato.capienzaCapannone) return alert("Capienza capannoni insufficiente! Amplia le stalle.");
+        
+        stato.cassa -= costo;
+        stato.pecore += num;
+        aggiungiLog(`Acquistate ${num} pecore per € ${costo}.`);
+        aggiornaUI();
+    }
+
+    function compraTerra() {
+        let ha = stato.terraDisponibileMercato;
+        let costo = ha * PREZZO_HA_TERRA;
+        if(stato.cassa < costo) return alert("Cassa insufficiente!");
+        
+        stato.cassa -= costo;
+        stato.terreniHa += ha;
+        stato.terraDisponibileMercato = 0;
+        aggiungiLog(`Acquistati ${ha} ettari di terreno per € ${costo}.`);
+        aggiornaUI();
+    }
+
+    function ampliaCapannone() {
+        let costo = 8000;
+        if(stato.cassa < costo) return alert("Cassa insufficiente!");
+        
+        stato.cassa -= costo;
+        stato.capienzaCapannone += 30;
+        aggiungiLog(`Ampliato capannone (+30 posti). Nuova capienza: ${stato.capienzaCapannone} capi.`);
+        aggiornaUI();
+    }
+
+    function compraAttrezzatura() {
+        let costo = 6000;
+        if(stato.cassa < costo) return alert("Cassa insufficiente!");
+        
+        stato.cassa -= costo;
+        stato.capacitaAttrezzature += 40;
+        aggiungiLog(`Potenziate attrezzature (+40 capi di capacità).`);
+        aggiornaUI();
+    }
+
+    function prendiMutuo() {
+        let importo = 10000;
+        let rata = 1300; // Capitale + Interessi
+        stato.cassa += importo;
+        stato.debito += importo;
+        stato.rataAnnua += rata;
+        aggiungiLog(`Ottenuto finanziamento di € ${importo}. Nuova rata annua: € ${stato.rataAnnua}.`);
+        aggiornaUI();
+    }
+
+    function avanzaAnno() {
+        // 1. Calcolo Produzione e Ricavi
+        let litriLatte = stato.pecore * PRODUZIONE_LATTE_CAPO;
+        let ricavoLatte = litriLatte * PREZZO_LATTE;
+        let ricavoPAC = stato.terreniHa * CONTRIBUTO_PAC_HA;
+        let totaleRicavi = ricavoLatte + ricavoPAC;
+
+        // 2. Calcolo Costi Automatici
+        let costoAlimento = stato.pecore * COSTO_ALIMENTAZIONE_CAPO;
+        
+        // Penale Sovraccarico Pascolo
+        let caricoTerra = stato.pecore / stato.terreniHa;
+        if(caricoTerra > 8) {
+            let extraCosto = (caricoTerra - 8) * 30 * stato.pecore;
+            costoAlimento += extraCosto; // Maggiore acquisto mangimi esterni
+        }
+
+        // Penale Sovraccarico Attrezzature
+        let costoManutenzione = stato.terreniHa * COSTI_FISSI_HA;
+        if(stato.pecore > stato.capacitaAttrezzature) {
+            costoManutenzione += (stato.pecore - stato.capacitaAttrezzature) * 40; // Usura o terzisti
+        }
+
+        let totaleCosti = costoAlimento + costoManutenzione + stato.rataAnnua;
+
+        // 3. Risultato Economico
+        let utileAnno = totaleRicavi - totaleCosti;
+        stato.cassa += utileAnno;
+
+        // 4. Ripagamento Debito
+        if(stato.debito > 0) {
+            stato.debito = Math.max(0, stato.debito - 1000);
+            if(stato.debito === 0) stato.rataAnnua = 0;
+        }
+
+        // 5. Dinamiche di Stalla (Rimonta / Riproduzione)
+        let agnelliVenduti = Math.round(stato.pecore * 0.8);
+        let ricavoAgnelli = agnelliVenduti * 70;
+        stato.cassa += ricavoAgnelli;
+
+        // 6. Aggiornamento Mercato della terra per l'anno prossimo
+        stato.terraDisponibileMercato = Math.floor(Math.random() * 4); // 0 a 3 ha disponibili
+
+        // Eventi Casuali
+        let eventoTxt = "";
+        let rand = Math.random();
+        if(rand < 0.15) {
+            let danno = 1500;
+            stato.cassa -= danno;
+            eventoTxt = " ⚠️ **Siccità estiva**: acquistato foraggio extra (-€1.500).";
+        } else if(rand > 0.85) {
+            let bonus = 2000;
+            stato.cassa += bonus;
+            eventoTxt = " 🎉 **Annata Favorevole**: ottima resa dei pascoli (+€2.000).";
+        }
+
+        stato.anno++;
+
+        aggiungiLog(`Risultati Anno: Ricavi € ${Math.round(totaleRicavi + ricavoAgnelli).toLocaleString()} | Costi € ${Math.round(totaleCosti).toLocaleString()} | **Utile: € ${Math.round(utileAnno + ricavoAgnelli).toLocaleString()}**.${eventoTxt}`);
+
+        if(stato.cassa < 0) {
+            alert("⚠️ Attenzione: Sei in bancarotta (Cassa negativa)! Chiedi un finanziamento o riduci il gregge.");
+        }
+
+        aggiornaUI();
+    }
+
+    // Inizializzazione
+    aggiornaUI();
+</script>
+</body>
+</html>
